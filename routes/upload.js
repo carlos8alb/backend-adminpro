@@ -33,7 +33,8 @@ app.put('/:tipo/:id', (req, res, next) => {
     }
 
     // Obtener nombre del archivo
-    var archivo = req.files.img;
+    var archivo = req.files.imagen;
+
     var nombreCortado = archivo.name.split('.');
     var extensionArchivo = nombreCortado[ nombreCortado.length - 1 ];    
 

@@ -44,61 +44,58 @@ app.post('/google', (req, res) => {
                         errors: err
                     });
                 }
-            });
-
-            if (usuario) {
-                if (usuario.google === false) {
-                    return res.status(400).json({
-                        ok: false,
-                        mensaje: 'Debe usar su autenticacion normal',
-                        errors: err
-                    });
-                } else {
-                    // Crear un token
-                    usuario.password = '';
-                    var token = jwt.sign({ usuario: usuario }, SEED, { expiresIn: 14400000 });
-
-                    res.status(200).json({
-                        ok: true,
-                        usuario: usuario,
-                        token: token,
-                        id: usuario.id
-                    });                    
-                }
-            } else {
-                // El usuario no existe por correo
-                var usuario = new Usuario();
-
-                usuario.nombre = payload.name;
-                usuario.email = payload.email;
-                usuario.password = bcrypt.hashSync(payload.sub, 10);
-                usuario.img = payload.picture;
-                usuario.google = true;                
-
-                usuario.save((err, usuarioDB) => {
-                    if (err) {
-                        return res.status(500).json({
+                
+                if (usuario) {
+                    if (usuario.google === false) {
+                        return res.status(400).json({
                             ok: false,
-                            mensaje: 'Error al crear usuario',
+                            mensaje: 'Debe usar su autenticacion normal',
                             errors: err
                         });
+                    } else {
+                        // Crear un token
+                        usuario.password = '';
+                        var token = jwt.sign({ usuario: usuario }, SEED, { expiresIn: 14400000 });
+                        
+                        res.status(200).json({
+                            ok: true,
+                            usuario: usuario,
+                            token: token,
+                            id: usuario.id                        
+                        });
                     }
+                } else {
+                    // El usuario no existe por correo
+                    var usuario = new Usuario();
                     
-                    var token = jwt.sign({ usuario: usuarioDB }, SEED, { expiresIn: 14400000 });
-
-                    res.status(200).json({
-                        ok: true,
-                        usuario: usuarioDB,
-                        token: token
+                    usuario.nombre = payload.name;
+                    usuario.email = payload.email;
+                    usuario.password = bcrypt.hashSync(payload.sub, 10);
+                    usuario.img = payload.picture;
+                    usuario.google = true;                
+                    
+                    usuario.save((err, usuarioDB) => {
+                        if (err) {
+                            return res.status(500).json({
+                                ok: false,
+                                mensaje: 'Error al crear usuario',
+                                errors: err
+                            });
+                        }
+                        
+                        var token = jwt.sign({ usuario: usuarioDB }, SEED, { expiresIn: 14400000 });
+                        
+                        res.status(200).json({
+                            ok: true,
+                            usuario: usuarioDB,
+                            token: token
+                        });
+                        
                     });
-
-                });
-
-            }
-
+                }
+            });
         }
     )
-
 });
 
 //Autenticacion normal
