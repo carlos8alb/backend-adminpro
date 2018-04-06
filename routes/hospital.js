@@ -10,12 +10,15 @@ var Hospital = require('../models/hospital');
 app.get('/', (req, res, next) => {
 
     var desde = req.query.desde || 0;
+    var hasta = req.query.hasta || 0;
     desde = Number(desde);
+    hasta = Number(hasta);
 
     Hospital.find({})
         .populate( 'usuario', 'nombre email' )
         .skip(desde)
-        .limit(5)
+        .limit(hasta)
+        .sort({nombre: 1})
         .exec(
         (err, hospitales) => {
 
@@ -33,6 +36,40 @@ app.get('/', (req, res, next) => {
                     hospitales: hospitales,
                     total: count
                 });
+            });
+
+        });
+
+});
+
+// Obtener un hospital por ID
+app.get('/:id', (req, res, next) => {
+
+    var id = req.params.id;
+
+    Hospital.findById(id)
+        .populate( 'usuario', 'nombre email' )        
+        .exec(
+        (err, hospital) => {
+
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error cargando hospital',
+                    errors: err
+                });
+            }
+
+            if (!hospital) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'El hospital solicitado no existe'
+                });
+            }
+
+            return res.status(200).json({
+                ok: true,
+                hospital: hospital
             });
 
         });
